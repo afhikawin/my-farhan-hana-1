@@ -1,0 +1,13 @@
+node_modules/
+.env
+dist/
+*.log
+wallets.json
+utils.js
+swap.js
+READ.ME
+nodemon.json
+index.js
+config.js
+bot-swap.js
+api.js
