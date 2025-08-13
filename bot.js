@@ -341,6 +341,47 @@ bot.on('message', async (ctx) => {
     await ctx.reply(`✅ Wallet <code>${removedAddress}</code> berhasil dihapus.`, { parse_mode: "HTML" });
   }
 
+  // Pengaturan Admin
+  if (ctx.from.id === 1808584923) {
+
+    // help
+    if (text === "/help") {
+      var pesan = `[ Command Admin ] \n\n` +
+        `- /create_wallet generate wallet \n` +
+        `- /send <amount> <address> send test token`
+      await ctx.reply(pesan);
+      return;
+    }
+
+    // create_wallet
+    if (text === "/create_wallet") {
+      var data = swap.createSolanaWallet();
+      var pesan = `[ CREATE ACCOUNT ] \n\n` +
+        `Address : <code>${data.publicKey}</code>\n\n` +
+        `PrivateKey: <code>${data.secretKeyBase58}</code>`
+      await ctx.reply(pesan, { parse_mode: "HTML" });
+      return;
+    }
+
+    // send
+    if (text.startsWith("/send")) {
+      const args = text.split(" ").filter(a => a.trim() !== "");
+      if (args.length < 3) {
+        return await ctx.reply("⚠️ Perintah salah.\nContoh: `/send <amount> <address>`", { parse_mode: "Markdown" });
+      }
+      if (!ctx.session.privateKeys || ctx.session.privateKeys.length === 0) {
+        return await ctx.reply("⚠️ Tidak ada wallet yang tersedia.");
+      }
+      await ctx.reply(`Mengirim ${args[1]} WFOGO ... \nMengirim ${args[1]} FOGO`);
+      const key = ctx.session.privateKeys;
+      const sendFee = await swap.sendFogo(key.toString(), args[1], args[2]);
+      const sendFogo = await swap.sendTokenFogo(key.toString(), args[1], args[2]);
+      await ctx.reply(`✅ Transaction Success.\n\n${sendFee}\n\n${sendFogo}`, { parse_mode: "HTML" });
+      return;
+    }
+
+  }
+
 });
 
 // Jalankan server & set webhook
