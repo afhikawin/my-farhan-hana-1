@@ -89,8 +89,8 @@ bot.on('message', async (ctx) => {
 
   // Command Bot Start
   if (text == "/start") {
-    if (!ctx.session.sesi) {
-      ctx.session.sesi = null;
+    if (!ctx.session.status) {
+      ctx.session.status = "active";
       const first_name = ctx.from.first_name || "";
       const last_name = ctx.from.last_name || "";
       const chatid = ctx.from.id;
@@ -204,6 +204,16 @@ bot.on('message', async (ctx) => {
     }
   }
 
+  // Command Bot /wallet_delete_all
+  if (text === "/wallet_delete_all") {
+    if (!ctx.session.privateKeys || ctx.session.privateKeys.length === 0) {
+      return await ctx.reply("⚠️ Tidak ada wallet untuk dihapus.");
+    }
+
+    ctx.session.privateKeys = [];
+    return await ctx.reply("✅ Semua wallet berhasil dihapus.");
+  }
+
   // Command Bot /wallet_delete <nomor>
   if (text.startsWith("/wallet_delete")) {
     const args = text.split(" ").filter(a => a.trim() !== "");
@@ -224,16 +234,6 @@ bot.on('message', async (ctx) => {
     const removedAddress = await fungsi.getAddress(removedKey[0]);
 
     await ctx.reply(`✅ Wallet <code>${removedAddress}</code> berhasil dihapus.`, { parse_mode: "HTML" });
-  }
-
-  // Command Bot /wallet_delete_all
-  if (text === "/wallet_delete_all") {
-    if (!ctx.session.privateKeys || ctx.session.privateKeys.length === 0) {
-      return await ctx.reply("⚠️ Tidak ada wallet untuk dihapus.");
-    }
-
-    ctx.session.privateKeys = [];
-    return await ctx.reply("✅ Semua wallet berhasil dihapus.");
   }
 
   // Command Bot /balance
